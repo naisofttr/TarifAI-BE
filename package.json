@@ -1,0 +1,40 @@
+{
+  "name": "tarifAI-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/app.js",
+  "scripts": {
+    "start": "node dist/app.js",
+    "dev": "NODE_NO_WARNINGS=1 nodemon --exec ts-node src/app.ts",
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc",
+    "vercel-build": "npm run build"
+  },
+  "dependencies": {
+    "@types/multer": "^1.4.12",
+    "apple-signin-auth": "^1.7.8",
+    "axios": "^1.6.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.18.2",
+    "firebase": "^11.2.0",
+    "firebase-admin": "^13.0.2",
+    "google-auth-library": "^9.7.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "openai": "^4.83.0",
+    "reflect-metadata": "^0.2.2",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/node": "^20.11.16",
+    "@types/uuid": "^10.0.0",
+    "nodemon": "^3.1.9",
+    "rimraf": "^5.0.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
