@@ -58,7 +58,10 @@ export class GetPromptService {
                 // Haftalık rutini kaydet
                 const createCurrentPromptCommand = new CreateCurrentPromptCommand();
                 const currentPromptResponse = await createCurrentPromptCommand.execute({
-                    ...currentPrompt
+                    combinationId: combinationId,
+                    languageCode: request.languageCode,
+                    servicePromptResponse: servicePromptResponse,
+                    promptServiceType: promptServiceType
                 });
 
                 if (!currentPromptResponse.success) {
