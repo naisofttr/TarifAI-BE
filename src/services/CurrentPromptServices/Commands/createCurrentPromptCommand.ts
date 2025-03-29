@@ -1,13 +1,8 @@
 import { database } from '../../../config/database';
 import { ref, set } from 'firebase/database';
 import { CurrentPromptDto } from '../../../dtos/CurrentPrompt/CurrentPromptDto';
+import { CurrentPrompt, CreatedCurrentPromptResponse } from '../../../models/currentPrompt';
 import { v4 as uuidv4 } from 'uuid';
-
-interface CreatedCurrentPromptResponse {
-    success: boolean;
-    data?: CurrentPromptDto;
-    errorMessage?: string;
-}
 
 export class CreateCurrentPromptCommand {
     async execute(request: CurrentPromptDto): Promise<CreatedCurrentPromptResponse> {
@@ -15,10 +10,14 @@ export class CreateCurrentPromptCommand {
             const id = uuidv4();
             const promptRef = ref(database, `currentPrompts/${id}`);
             
-            const currentPrompt: CurrentPromptDto = {
+            const currentPrompt: CurrentPrompt = {
+                id,
                 combinationId: request.combinationId,
+                languageCode: request.languageCode,
+                servicePromptResponse: request.servicePromptResponse,
                 promptServiceType: request.promptServiceType,
-                currentPrompts: request.currentPrompts
+                confirmedCount: 0,
+                createdAt: new Date().toISOString()
             };
             
             await set(promptRef, currentPrompt);
