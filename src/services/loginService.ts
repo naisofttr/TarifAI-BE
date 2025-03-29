@@ -17,10 +17,10 @@ export class LoginService {
     async handleLogin(customerData: CreateCustomerDto, loginType: LoginType): Promise<CreatedCustomerResponse> {
         switch (loginType) {
             case LoginType.GOOGLE:
-                return await this.loginWithGoogleService.loginWithGoogle(customerData);
+                // return await this.loginWithGoogleService.loginWithGoogle(customerData);
 
             case LoginType.APPLE:
-                return await this.loginWithAppleService.loginWithApple(customerData);
+                // return await this.loginWithAppleService.loginWithApple(customerData);
 
             case LoginType.EMAIL:
                 // Şimdilik EMAIL için bir işlem yapmıyoruz

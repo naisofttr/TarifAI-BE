@@ -1,6 +1,0 @@
-export enum DailyWalkingDurationRange {
-    ONE_TO_THIRTY = 130,
-    THIRTYONE_TO_SIXTY = 3160,
-    SIXTYONE_TO_NINETY = 6190,
-    NINETYONE_TO_ONE_TWENTY = 91120
-}

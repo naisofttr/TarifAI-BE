@@ -1,7 +1,7 @@
-import { WeeklyRoutineDto } from "../WeeklyRoutine/WeeklyRoutineDto";
+import { CreateCurrentPromptDto } from "../CurrentPrompt/CreateCurrentPromptDto";
 
 export interface PromptResponse {
-    data?: WeeklyRoutineDto;
+    data?: CreateCurrentPromptDto;
     message: string;
     confirmedCount?: number;
     error?: string;

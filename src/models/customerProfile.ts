@@ -1,5 +1,4 @@
 import { CustomerProfileDto } from "../dtos/CustomerProfile/customerProfileDto";
-import { exerciseExperienceType } from "../enums/exerciseExperienceType";
 import { genderType } from "../enums/genderType";
 import { badHabitsType } from "../enums/profileEnums/badHabitsType";
 import { bodyType } from "../enums/profileEnums/bodyType";
@@ -18,47 +17,12 @@ import { targetType } from "../enums/profileEnums/targetType";
 import { trainingDayType } from "../enums/profileEnums/trainingDayType";
 
 
-export interface CustomerProfile {
+export interface CustomerProfile extends CustomerProfileDto {
     id: string;
-    customerId: string;
-    
-    gender: genderType;                                  // cinsiyet
-    targetType: targetType;                              // hedef
-    bodyType: bodyType;                                  // vücut tipi
-    focusAreaType: focusAreaType[];                      // bölge secimi
-    exerciseExperienceType: exerciseExperienceType;         // sıklık
-    formType: formType;
-
-    age: number;                                        // Yaş
-    height: number;                                     // boy (cm)
-    weight: number;                                     // kg
-
-    howOftenExercise: howOftenExercise;                 // ne sıkılıkta spor yapabilirsin.
-    pushUpCapacity: pushUpCapacityType;                 // şınav çekebilme
-    badHabits: badHabitsType[];                         // kötü alışkanlıklar
-    dailySleepDuration: sleepDurationType;              // günlük uyku süresi
-    stressFrequency: stressFrequencyType;                // stres seviyesi
-    motivationSources: motivationSourceType[];           // motivasyon kaynağı
-    motivationLevel: motivationLevelType;                // motivasyon seviyesi
-    commitmentDuration: commitmentDurationType;          // taahhüt süresi
-    preferredPace: preferredPaceType;                    // tercih edilen tempo
-    energyLevel: energyLevelType;                        // enerji seviyesi
-    trainingDays: trainingDayType[];                     // antrenman günleri
-    exerciseEquipments: string[];                       // egzersiz ekipmanları (dumbell, barfiks demiri vs.)
-    hasKneePain: boolean;                               // diz ağrısı çekiyor musun?
-    kneePainLevel: number;                              // diz ağrısı seviyesi (1-10)
-    squatCapacity: number;                              // kaç tane çömelme yapabilirsin (1-200)
-    plankDuration: number;                              // plankte kalabilme süresi (15sn - 600sn)
-    dailyWalkingDuration: number;                       // günlük yürüme süresi (1dk - 120dk)
-    weekNumber: number;                                 // programın kaçıncı haftası
-    hasSoundRestriction: boolean;                       // ses kısıtlaması var mı?
-    
-    createdAt?: string;
-    updatedAt?: string;
 }
+
 export interface CreatedCustomerProfileResponse {
     success: boolean;
     data?: CustomerProfileDto;
     errorMessage?: string;
-    combinationId?: string;
 }

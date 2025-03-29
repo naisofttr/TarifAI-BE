@@ -3,12 +3,10 @@ import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import promptRoutes from './routes/promptRoutes';
-import customerRoutes from './routes/customerRoutes';
 import authRoutes from './routes/authRoutes';
-import exerciseEquipmentRoutes from './routes/exerciseEquipmentRoutes';
 import mediaRoutes from './routes/mediaRoutes';
-import weeklyRoutineRoutes from './routes/weeklyRoutineRoutes';
 import { initializeDatabase } from './config/database';
+import currentPromptRoutes from './routes/currentPromptRoutes';
 
 // Creating express app
 const app = express();
@@ -34,12 +32,9 @@ app.get('/', (req: Request, res: Response) => {
 
 // Use route modules
 app.use('/api', promptRoutes);
-app.use('/api', customerRoutes);
 app.use('/api', authRoutes);
-app.use('/api', exerciseEquipmentRoutes);
 app.use('/api', mediaRoutes);
-app.use('/api', weeklyRoutineRoutes);
-
+app.use('/api', currentPromptRoutes);
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: express.NextFunction) => {
     console.error(err.stack);

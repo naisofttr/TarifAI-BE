@@ -4,8 +4,8 @@ import { Request } from 'express';
 import { getDeepSeekPrompt } from '../../DeepSeekServices/getDeepSeekPrompt';
 import { getChatGptPrompt } from '../../ChatGptServices/getChatGptPrompt';
 import { PromptServiceType } from '../../../enums/PromptServiceType';
-import { CreateWeeklyRoutineCommand } from '../../WeeklyRoutineServices/Commands/createWeeklyRoutineCommand';
-import { CreateWeeklyRoutineDto } from '../../../dtos/WeeklyRoutine/CreateWeeklyRoutineDto';
+import { CreateCurrentPromptCommand } from '../../CurrentPromptServices/Commands/createCurrentPromptCommand';
+import { CreateCurrentPromptDto } from '../../../dtos/CurrentPrompt/CreateCurrentPromptDto';
 
 export class GetPromptService {
     private gptApiKey: string;
@@ -46,28 +46,28 @@ export class GetPromptService {
 
             if (response.choices && response.choices.length > 0) {
                 const servicePromptResponse = response.choices[0].message.content;
-                // Parse the response string into CreateWeeklyRoutineDto[]
-                let weeklyRoutine: CreateWeeklyRoutineDto;
+                // Parse the response string into CreateCurrentPromptDto[]
+                let currentPrompt: CreateCurrentPromptDto;
                 try {
-                    weeklyRoutine = JSON.parse(servicePromptResponse);
+                    currentPrompt = JSON.parse(servicePromptResponse);
                 } catch (error) {
                     throw new Error(`Failed to parse AI response into daily routines: ${error}`);
                 }
-                weeklyRoutine.combinationId = combinationId;
-                weeklyRoutine.promptServiceType = promptServiceType;
+                currentPrompt.combinationId = combinationId;
+                currentPrompt.promptServiceType = promptServiceType;
                 // Haftalık rutini kaydet
-                const createWeeklyRoutineCommand = new CreateWeeklyRoutineCommand();
-                const weeklyRoutineResponse = await createWeeklyRoutineCommand.execute({
-                    ...weeklyRoutine
+                const createCurrentPromptCommand = new CreateCurrentPromptCommand();
+                const currentPromptResponse = await createCurrentPromptCommand.execute({
+                    ...currentPrompt
                 });
 
-                if (!weeklyRoutineResponse.success) {
-                    throw new Error(weeklyRoutineResponse.errorMessage);
+                if (!currentPromptResponse.success) {
+                    throw new Error(currentPromptResponse.errorMessage);
                 }
 
                 return {
-                    data: weeklyRoutine,
-                    message: weeklyRoutineResponse.errorMessage || '',
+                    data: currentPrompt,
+                    message: currentPromptResponse.errorMessage || '',
                     confirmedCount: 0,
                     success: true
                 };
