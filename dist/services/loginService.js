@@ -22,9 +22,9 @@ class LoginService {
         return __awaiter(this, void 0, void 0, function* () {
             switch (loginType) {
                 case loginType_1.LoginType.GOOGLE:
-                    return yield this.loginWithGoogleService.loginWithGoogle(customerData);
+                // return await this.loginWithGoogleService.loginWithGoogle(customerData);
                 case loginType_1.LoginType.APPLE:
-                    return yield this.loginWithAppleService.loginWithApple(customerData);
+                // return await this.loginWithAppleService.loginWithApple(customerData);
                 case loginType_1.LoginType.EMAIL:
                     // Şimdilik EMAIL için bir işlem yapmıyoruz
                     return {

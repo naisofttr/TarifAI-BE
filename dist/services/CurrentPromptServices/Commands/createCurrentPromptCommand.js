@@ -20,9 +20,13 @@ class CreateCurrentPromptCommand {
                 const id = (0, uuid_1.v4)();
                 const promptRef = (0, database_2.ref)(database_1.database, `currentPrompts/${id}`);
                 const currentPrompt = {
+                    id,
                     combinationId: request.combinationId,
+                    languageCode: request.languageCode,
+                    servicePromptResponse: request.servicePromptResponse,
                     promptServiceType: request.promptServiceType,
-                    currentPrompts: request.currentPrompts
+                    confirmedCount: 0,
+                    createdAt: new Date().toISOString()
                 };
                 yield (0, database_2.set)(promptRef, currentPrompt);
                 return {

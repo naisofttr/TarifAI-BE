@@ -52,7 +52,12 @@ class GetPromptService {
                     currentPrompt.promptServiceType = promptServiceType;
                     // Haftalık rutini kaydet
                     const createCurrentPromptCommand = new createCurrentPromptCommand_1.CreateCurrentPromptCommand();
-                    const currentPromptResponse = yield createCurrentPromptCommand.execute(Object.assign({}, currentPrompt));
+                    const currentPromptResponse = yield createCurrentPromptCommand.execute({
+                        combinationId: combinationId,
+                        languageCode: request.languageCode,
+                        servicePromptResponse: servicePromptResponse,
+                        promptServiceType: promptServiceType
+                    });
                     if (!currentPromptResponse.success) {
                         throw new Error(currentPromptResponse.errorMessage);
                     }

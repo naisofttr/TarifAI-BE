@@ -8,7 +8,6 @@ require("dotenv/config");
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const promptRoutes_1 = __importDefault(require("./routes/promptRoutes"));
-const customerRoutes_1 = __importDefault(require("./routes/customerRoutes"));
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const mediaRoutes_1 = __importDefault(require("./routes/mediaRoutes"));
 const database_1 = require("./config/database");
@@ -33,7 +32,6 @@ app.get('/', (req, res) => {
 });
 // Use route modules
 app.use('/api', promptRoutes_1.default);
-app.use('/api', customerRoutes_1.default);
 app.use('/api', authRoutes_1.default);
 app.use('/api', mediaRoutes_1.default);
 app.use('/api', currentPromptRoutes_1.default);
