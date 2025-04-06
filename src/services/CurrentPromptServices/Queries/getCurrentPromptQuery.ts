@@ -1,66 +1,78 @@
 import { Request } from 'express';
 import { ref, get } from 'firebase/database';
-import { CreateCombinationCommand } from '../../CombinationServices/Commands/createCombinationCommand';
-import { CustomerProfileDto } from '../../../dtos/CustomerProfile/customerProfileDto';
-import { GetPromptService } from '../../Prompt/Queries/GetPromptService';
 import { database } from '../../../config/database';
-import { CreateCurrentPromptDto } from '../../../dtos/CurrentPrompt/CreateCurrentPromptDto';
+import { CreateCombinationCommand } from '../../CombinationServices/Commands/createCombinationCommand';
+import { GetPromptService } from '../../Prompt/Queries/GetPromptService';
+import { GetCombinationQuery } from '../../CombinationServices/Queries/getCombinationQuery';
+import { IngredientRequestDto } from '../../../dtos/Ingredients/ingredient-request.dto';
 
-export interface CurrentPromptResponse {
+interface CurrentPromptResponse {
     success: boolean;
-    data?: CreateCurrentPromptDto;
-    errorMessage?: string;
+    data?: any;
+    errorMessage: string;
     combinationId?: string;
 }
 
 export class GetCurrentPromptQuery {
     async execute(req: Request): Promise<CurrentPromptResponse> {
         try {
-            const { profileData, combinationId } = req.body;
+            const { ingredientData, languageCode } = req.body;
+            
+            // Önce GetCombinationQuery'yi çağır
+            const getCombinationQuery = new GetCombinationQuery();
+            const combinationResult = await getCombinationQuery.execute(ingredientData as IngredientRequestDto);
 
-            // Önce mevcut prompt'u kontrol et
-            const promptRef = ref(database, `currentPrompts/${combinationId}`);
-            const promptSnapshot = await get(promptRef);
+            if (combinationResult.success && typeof combinationResult.data === 'string') {
+                // CombinationId bulundu, currentPrompts'tan veriyi al
+                const promptRef = ref(database, `currentPrompts/${combinationResult.data}`);
+                const promptSnapshot = await get(promptRef);
 
-            if (promptSnapshot.exists()) {
-                return {
-                    success: true,
-                    data: promptSnapshot.val(),
-                    errorMessage: 'Current prompt found in database',
-                    combinationId: combinationId
-                };
-            }
-
-            // Eğer mevcut değilse, yeni bir combination ve prompt oluştur
-            const createCombinationCommand = new CreateCombinationCommand();
-            const combinationResult = await createCombinationCommand.execute(profileData as CustomerProfileDto);
-            const combinationResultMessage = combinationResult.errorMessage;
-            let promptResultMessage = '';
-
-            if (combinationResult.success && combinationResult.data?.customerProfileData) {
-                // Send to GetPromptService
-                const getPromptService = new GetPromptService();
-                const promptRequest = {
-                    prompt: combinationResult.data.customerProfileData,
-                    languageCode: req.body.languageCode
-                };
-
-                const promptResponse = await getPromptService.getPromptResponse(promptRequest, req, combinationResult.data.id);
-                promptResultMessage = promptResponse.message;
-
-                if (promptResponse.success) {
+                if (promptSnapshot.exists()) {
                     return {
                         success: true,
-                        data: promptResponse.data,
-                        errorMessage: 'Current prompt successfully created,' + combinationResultMessage + ',' + promptResultMessage,
-                        combinationId: combinationResult.data.id
+                        data: promptSnapshot.val(),
+                        errorMessage: 'Current prompt found in database',
+                        combinationId: combinationResult.data
                     };
                 }
             }
 
+            // Eşleşen combination bulunamadı, yeni bir tane oluştur
+            const createCombinationCommand = new CreateCombinationCommand();
+            const newCombinationResult = await createCombinationCommand.execute(ingredientData as IngredientRequestDto);
+
+            if (!newCombinationResult.success || !newCombinationResult.data) {
+                return {
+                    success: false,
+                    errorMessage: 'Failed to create new combination'
+                };
+            }
+
+            // Yeni prompt al
+            const getPromptService = new GetPromptService();
+            const promptRequest = {
+                prompt: ingredientData,
+                languageCode: languageCode
+            };
+
+            const promptResponse = await getPromptService.getPromptResponse(
+                promptRequest, 
+                req, 
+                newCombinationResult.data.id
+            );
+
+            if (!promptResponse.success) {
+                return {
+                    success: false,
+                    errorMessage: 'Failed to get prompt response'
+                };
+            }
+
             return {
-                success: false,
-                errorMessage: 'Failed to create current prompt,' + combinationResultMessage + ',' + promptResultMessage
+                success: true,
+                data: promptResponse.data,
+                errorMessage: 'New prompt created successfully',
+                combinationId: newCombinationResult.data.id
             };
 
         } catch (error) {

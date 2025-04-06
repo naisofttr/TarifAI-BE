@@ -1,29 +1,24 @@
 import { ref, query, orderByChild, equalTo, get } from 'firebase/database';
 import { database } from '../../../config/database';
-import { CustomerProfileDto } from '../../../dtos/CustomerProfile/customerProfileDto';
+import { IngredientRequestDto } from '../../../dtos/Ingredients/ingredient-request.dto';
 
 interface CombinationData {
     id: string;
-    customerProfileData: CustomerProfileDto;
+    ingredientData: IngredientRequestDto;
     createdAt: string;
 }
 
-interface CombinationQueryResponse {
+export interface CombinationQueryResponse {
     success: boolean;
-    data?: CombinationData[];
-    errorMessage?: string;
+    data?: CombinationData[] | string;
+    errorMessage: string;
 }
 
 export class GetCombinationQuery {
-    async execute(profileData: CustomerProfileDto): Promise<CombinationQueryResponse> {
+    async execute(ingredientData: IngredientRequestDto): Promise<CombinationQueryResponse> {
         try {
             const combinationsRef = ref(database, 'combinations');
-            const combinationQuery = query(
-                combinationsRef,
-                orderByChild('customerProfileData/exerciseExperience'),
-                equalTo(profileData.exerciseExperience)
-            );
-
+            const combinationQuery = query(combinationsRef);
             const snapshot = await get(combinationQuery);
 
             if (!snapshot.exists()) {
@@ -34,15 +29,29 @@ export class GetCombinationQuery {
                 };
             }
 
-            const combinations: CombinationData[] = [];
+            let matchingCombinationId: string | null = null;
+            
             snapshot.forEach((childSnapshot) => {
-                combinations.push(childSnapshot.val());
+                const combination = childSnapshot.val();
+                if (JSON.stringify(combination.ingredientData.ingredients) === 
+                    JSON.stringify(ingredientData.ingredients)) {
+                    matchingCombinationId = childSnapshot.key;
+                    return true; // Break the forEach loop
+                }
             });
+
+            if (matchingCombinationId) {
+                return {
+                    success: true,
+                    data: matchingCombinationId,
+                    errorMessage: 'Matching combination found'
+                };
+            }
 
             return {
                 success: true,
-                data: combinations,
-                errorMessage: 'Combinations found'
+                data: [],
+                errorMessage: 'No matching combination found'
             };
 
         } catch (error) {
