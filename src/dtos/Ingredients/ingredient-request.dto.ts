@@ -57,6 +57,11 @@ export class IngredientCategoriesDto implements IIngredientCategories {
   @IsArray()
   @IsString({ each: true })
   nuts?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  cannedPickledSauces?: string[];
 }
 
 export class IngredientRequestDto implements IIngredientRequest {
