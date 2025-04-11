@@ -5,7 +5,7 @@
   "main": "dist/app.js",
   "scripts": {
     "start": "node dist/app.js",
-    "dev": "NODE_NO_WARNINGS=1 nodemon --exec ts-node src/app.ts",
+    "dev": "nodemon --exec ts-node src/app.ts",
     "clean": "rimraf dist",
     "build": "npm run clean && tsc",
     "vercel-build": "npm run build"
