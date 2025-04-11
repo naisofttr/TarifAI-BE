@@ -20,7 +20,7 @@ export class CreateCombinationCommand {
             
             await set(combinationRef, {
                 id,
-                ingredients: request,
+                ingredients: request.ingredients,
                 createdAt: new Date().toISOString()
             });
             

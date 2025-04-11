@@ -5,8 +5,9 @@ import cors from 'cors';
 import promptRoutes from './routes/promptRoutes';
 import authRoutes from './routes/authRoutes';
 import mediaRoutes from './routes/mediaRoutes';
-import { initializeDatabase } from './config/database';
 import currentPromptRoutes from './routes/currentPromptRoutes';
+import combinationRoutes from './routes/combinationRoutes';
+import { initializeDatabase } from './config/database';
 
 // Creating express app
 const app = express();
@@ -35,6 +36,8 @@ app.use('/api', promptRoutes);
 app.use('/api', authRoutes);
 app.use('/api', mediaRoutes);
 app.use('/api', currentPromptRoutes);
+app.use('/api', combinationRoutes);
+
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: express.NextFunction) => {
     console.error(err.stack);
