@@ -1,4 +1,4 @@
-import { ref, query, orderByChild, equalTo, get } from 'firebase/database';
+import { ref, query, get } from 'firebase/database';
 import { database } from '../../../config/database';
 import { IngredientRequestDto } from '../../../dtos/Ingredients/ingredient-request.dto';
 
@@ -33,10 +33,10 @@ export class GetCombinationQuery {
             
             snapshot.forEach((childSnapshot) => {
                 const combination = childSnapshot.val();
-                if (JSON.stringify(combination.ingredientData.ingredients) === 
-                    JSON.stringify(ingredientData.ingredients)) {
-                    matchingCombinationId = childSnapshot.key;
-                    return true; // Break the forEach loop
+                if(combination !== null){
+                    if(combination.id !== null){
+                        matchingCombinationId = combination.id;
+                    }
                 }
             });
 

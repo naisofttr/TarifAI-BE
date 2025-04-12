@@ -25,12 +25,12 @@ export class GetCurrentPromptQuery {
             if (combinationResult.success && typeof combinationResult.data === 'string') {
                 // CombinationId bulundu, currentPrompts'tan veriyi al
                 const promptRef = ref(database, `currentPrompts/${combinationResult.data}`);
-                const promptSnapshot = await get(promptRef);
+                const currentPromptSnapshot = await get(promptRef);
 
-                if (promptSnapshot.exists()) {
+                if (currentPromptSnapshot.exists()) {
                     return {
                         success: true,
-                        data: promptSnapshot.val(),
+                        data: currentPromptSnapshot.val(),
                         errorMessage: 'Current prompt found in database',
                         combinationId: combinationResult.data
                     };

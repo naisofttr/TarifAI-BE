@@ -55,7 +55,7 @@ export class GetPromptService {
                 }
                 currentPrompt.combinationId = combinationId;
                 currentPrompt.promptServiceType = promptServiceType;
-                // Haftalık rutini kaydet
+                
                 const createCurrentPromptCommand = new CreateCurrentPromptCommand();
                 const currentPromptResponse = await createCurrentPromptCommand.execute({
                     combinationId: combinationId,
