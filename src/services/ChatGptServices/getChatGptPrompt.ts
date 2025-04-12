@@ -1,13 +1,13 @@
 import axios from 'axios';
 import { ChatGPTResponse } from '../../dtos/ChatGPT/ChatGPTResponseDto';
 import { generatePromptContent } from '../../utils/promptContentGenerator';
-import { CustomerProfileDto } from '../../dtos/CustomerProfile/customerProfileDto';
+import { IngredientCategoriesDto } from '../../dtos/Ingredients/ingredient-request.dto';
 
 export const getChatGptPrompt = async (
     endpoint: string,
     apiKey: string,
     languageCode: string,
-    prompt: CustomerProfileDto
+    prompt: IngredientCategoriesDto
 ): Promise<ChatGPTResponse> => {
     const response = await axios.post<ChatGPTResponse>(
         endpoint,
