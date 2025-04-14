@@ -40,6 +40,7 @@ export class GetPromptService {
                     request.languageCode,
                     request.prompt
                 );
+                console.log(responseChatGpt);
                 promptServiceType = PromptServiceType.ChatGpt;
                 response = responseChatGpt;
             }
@@ -49,9 +50,20 @@ export class GetPromptService {
                 // Parse the response string into CreateCurrentPromptDto[]
                 let currentPrompt: CreateCurrentPromptDto;
                 try {
-                    currentPrompt = JSON.parse(servicePromptResponse);
+                    // Check if the response is already in JSON format
+                    if (servicePromptResponse.trim().startsWith('{')) {
+                        currentPrompt = JSON.parse(servicePromptResponse);
+                    } else {
+                        // If not JSON, create a JSON structure from the markdown response
+                        currentPrompt = {
+                            combinationId: combinationId,
+                            promptServiceType: promptServiceType,
+                            currentPrompts: servicePromptResponse
+                        };
+                    }
                 } catch (error) {
-                    throw new Error(`Failed to parse AI response into daily routines: ${error}`);
+                    console.error('Error parsing response:', error);
+                    throw new Error(`Failed to process AI response: ${error}`);
                 }
                 currentPrompt.combinationId = combinationId;
                 currentPrompt.promptServiceType = promptServiceType;
