@@ -10,7 +10,6 @@ interface CurrentPromptResponse {
     success: boolean;
     data?: any;
     errorMessage: string;
-    combinationId?: string;
 }
 
 export class GetCurrentPromptQuery {
@@ -28,11 +27,12 @@ export class GetCurrentPromptQuery {
                 const currentPromptSnapshot = await get(promptRef);
 
                 if (currentPromptSnapshot.exists()) {
+                    const data = currentPromptSnapshot.val();
+                    data.combinationId = combinationResult.data;
                     return {
                         success: true,
-                        data: currentPromptSnapshot.val(),
-                        errorMessage: 'Current prompt found in database',
-                        combinationId: combinationResult.data
+                        data: data,
+                        errorMessage: 'Current prompt found in database'
                     };
                 }
             }
@@ -71,8 +71,7 @@ export class GetCurrentPromptQuery {
             return {
                 success: true,
                 data: promptResponse.data,
-                errorMessage: 'New prompt created successfully',
-                combinationId: newCombinationResult.data.id
+                errorMessage: 'New prompt created successfully'
             };
 
         } catch (error) {
