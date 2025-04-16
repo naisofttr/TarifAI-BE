@@ -21,7 +21,8 @@ export class GetCurrentPromptQuery {
             const getCombinationQuery = new GetCombinationQuery();
             const combinationResult = await getCombinationQuery.execute(ingredientData as IngredientRequestDto);
 
-            if (combinationResult.success && typeof combinationResult.data === 'string') {
+            // combinationResult'ın içeriği güvenli şekilde kontrol ediliyor
+            if (combinationResult && combinationResult.success && typeof combinationResult.data === 'string' && combinationResult.data.length > 0) {
                 // CombinationId bulundu, currentPrompts'tan veriyi al
                 const promptRef = ref(database, `currentPrompts/${combinationResult.data}`);
                 const currentPromptSnapshot = await get(promptRef);
@@ -34,10 +35,33 @@ export class GetCurrentPromptQuery {
                         data: data,
                         errorMessage: 'Current prompt found in database'
                     };
+                } else {
+                    // combination bulundu ama currentPrompt kaydı yoksa, yeni prompt oluşturulacak
+                    const getPromptService = new GetPromptService();
+                    const promptRequest = {
+                        prompt: ingredientData,
+                        languageCode: languageCode
+                    };
+                    const promptResponse = await getPromptService.getPromptResponse(
+                        promptRequest, 
+                        req, 
+                        combinationResult.data
+                    );
+                    if (!promptResponse.success) {
+                        return {
+                            success: false,
+                            errorMessage: 'Failed to get prompt response'
+                        };
+                    }
+                    return {
+                        success: true,
+                        data: promptResponse.data,
+                        errorMessage: 'New prompt created for existing combination'
+                    };
                 }
             }
 
-            // Eşleşen combination bulunamadı, yeni bir tane oluştur
+            // Hiçbir combinationId bulunamazsa yeni combination ve prompt oluştur
             const createCombinationCommand = new CreateCombinationCommand();
             const newCombinationResult = await createCombinationCommand.execute(ingredientData as IngredientRequestDto);
 
@@ -73,6 +97,7 @@ export class GetCurrentPromptQuery {
                 data: promptResponse.data,
                 errorMessage: 'New prompt created successfully'
             };
+
 
         } catch (error) {
             console.error('Error in GetCurrentPromptQuery:', error);
