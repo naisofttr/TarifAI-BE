@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { ref, get } from 'firebase/database';
+import { ref, query, get, orderByChild, equalTo } from 'firebase/database';
 import { database } from '../../../config/database';
 import { CreateCombinationCommand } from '../../CombinationServices/Commands/createCombinationCommand';
 import { GetPromptService } from '../../Prompt/Queries/GetPromptService';
@@ -23,16 +23,27 @@ export class GetCurrentPromptQuery {
 
             // combinationResult'ın içeriği güvenli şekilde kontrol ediliyor
             if (combinationResult && combinationResult.success && typeof combinationResult.data === 'string' && combinationResult.data.length > 0) {
-                // CombinationId bulundu, currentPrompts'tan veriyi al
-                const promptRef = ref(database, `currentPrompts/${combinationResult.data}`);
-                const currentPromptSnapshot = await get(promptRef);
-
+                console.log('Combination Result Data:', combinationResult.data);
+                
+                // currentPrompts koleksiyonunda combinationId'ye göre arama yap
+                const promptRef = ref(database, 'currentPrompts');
+                const promptQuery = query(
+                    promptRef,
+                    orderByChild('combinationId'),
+                    equalTo(combinationResult.data)
+                );
+                
+                const currentPromptSnapshot = await get(promptQuery);
+                console.log('Snapshot exists:', currentPromptSnapshot.exists());
+                
                 if (currentPromptSnapshot.exists()) {
-                    const data = currentPromptSnapshot.val();
-                    data.combinationId = combinationResult.data;
+                    // İlk eşleşen prompt'u al
+                    const promptData = Object.values(currentPromptSnapshot.val())[0];
+                    console.log('Found prompt:', promptData);
+                    
                     return {
                         success: true,
-                        data: data,
+                        data: promptData,
                         errorMessage: 'Current prompt found in database'
                     };
                 } else {
@@ -97,7 +108,6 @@ export class GetCurrentPromptQuery {
                 data: promptResponse.data,
                 errorMessage: 'New prompt created successfully'
             };
-
 
         } catch (error) {
             console.error('Error in GetCurrentPromptQuery:', error);
