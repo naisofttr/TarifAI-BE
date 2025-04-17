@@ -1,4 +1,4 @@
-import { IsOptional, IsArray, IsString, ValidateNested } from 'class-validator';
+import { IsOptional, IsArray, IsString, ValidateNested, IsNotEmpty } from 'class-validator';
 import { Type } from 'class-transformer';
 import { IIngredientRequest, IIngredientCategories } from './interfaces/index';
 
@@ -75,4 +75,27 @@ export class IngredientRequestArrayDto {
   @ValidateNested({ each: true })
   @Type(() => IngredientCategoriesDto)
   ingredients!: IngredientCategoriesDto[];
+}
+
+export class IngredientDataDto {
+  @ValidateNested()
+  @Type(() => IngredientCategoriesDto)
+  ingredients!: IngredientCategoriesDto;
+}
+
+export class CombinationRequestItemDto {
+  @ValidateNested()
+  @Type(() => IngredientDataDto)
+  ingredientData!: IngredientDataDto;
+
+  @IsString()
+  @IsNotEmpty()
+  languageCode!: string;
+}
+
+export class CombinationArrayRequestDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CombinationRequestItemDto)
+  combinations!: CombinationRequestItemDto[];
 } 
