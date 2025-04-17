@@ -24,6 +24,7 @@ export class CreateCurrentPromptArrayCommand {
             for (const item of request.data) {
                 const currentPromptDto: CurrentPromptDto = {
                     combinationId: item.combinationId,
+                    languageCode: 'tr', // Varsayılan dil kodu
                     servicePromptResponse: item.currentPrompts,
                     promptServiceType: item.promptServiceType
                 };
@@ -34,6 +35,7 @@ export class CreateCurrentPromptArrayCommand {
                 const currentPrompt: CurrentPrompt = {
                     id,
                     combinationId: currentPromptDto.combinationId,
+                    languageCode: currentPromptDto.languageCode,
                     servicePromptResponse: currentPromptDto.servicePromptResponse,
                     promptServiceType: currentPromptDto.promptServiceType,
                     confirmedCount: 0,
