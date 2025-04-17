@@ -68,4 +68,11 @@ export class IngredientRequestDto implements IIngredientRequest {
   @ValidateNested()
   @Type(() => IngredientCategoriesDto)
   ingredients!: IngredientCategoriesDto;
+}
+
+export class IngredientRequestArrayDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => IngredientCategoriesDto)
+  ingredients!: IngredientCategoriesDto[];
 } 
