@@ -4,28 +4,39 @@ import { CurrentPromptDto } from '../../../dtos/CurrentPrompt/CurrentPromptDto';
 import { CurrentPrompt, CreatedCurrentPromptResponse } from '../../../models/currentPrompt';
 import { v4 as uuidv4 } from 'uuid';
 import { PromptServiceType } from '../../../enums/PromptServiceType';
-
-// DTO tanımları
-interface CurrentPromptArrayItemDto {
-    combinationId: string;
-    promptServiceType: PromptServiceType;
-    currentPrompts: string;
-}
-
-interface CreateCurrentPromptArrayDto {
-    data: CurrentPromptArrayItemDto[];
-}
+import { CreateCurrentPromptArrayDto, CurrentPromptArrayItemDto } from '../../../dtos/CurrentPrompt/CreateCurrentPromptArrayDto';
 
 export class CreateCurrentPromptArrayCommand {
-    async execute(request: CreateCurrentPromptArrayDto): Promise<CreatedCurrentPromptResponse> {
+    async execute(request: CreateCurrentPromptArrayDto | any[]): Promise<CreatedCurrentPromptResponse> {
         try {
             const results: CurrentPrompt[] = [];
             
-            for (const item of request.data) {
+            // Input validation and normalization
+            let dataItems: CurrentPromptArrayItemDto[] = [];
+            
+            if (Array.isArray(request)) {
+                // Handle array input format from example
+                dataItems = request.map(item => {
+                    return {
+                        combinationId: item.data.combinationId,
+                        promptServiceType: item.data.promptServiceType,
+                        servicePromptResponse: item.data.servicePromptResponse
+                    };
+                });
+            } else if (request.data && Array.isArray(request.data)) {
+                dataItems = request.data;
+            } else {
+                return {
+                    success: false,
+                    errorMessage: 'Geçersiz istek formatı. Array veya data property içinde array olmalıdır.'
+                };
+            }
+            
+            for (const item of dataItems) {
                 const currentPromptDto: CurrentPromptDto = {
                     combinationId: item.combinationId,
                     languageCode: 'tr', // Varsayılan dil kodu
-                    servicePromptResponse: item.currentPrompts,
+                    servicePromptResponse: item.servicePromptResponse,
                     promptServiceType: item.promptServiceType
                 };
                 
