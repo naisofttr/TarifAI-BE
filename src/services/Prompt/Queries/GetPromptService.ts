@@ -6,6 +6,7 @@ import { getChatGptPrompt } from '../../ChatGptServices/getChatGptPrompt';
 import { PromptServiceType } from '../../../enums/PromptServiceType';
 import { CreateCurrentPromptCommand } from '../../CurrentPromptServices/Commands/createCurrentPromptCommand';
 import { CreateCurrentPromptDto } from '../../../dtos/CurrentPrompt/CreateCurrentPromptDto';
+import { PromptType } from '../../../enums/PromptType';
 
 export class GetPromptService {
     private gptApiKey: string;
@@ -73,7 +74,8 @@ export class GetPromptService {
                     combinationId: combinationId,
                     languageCode: request.languageCode,
                     servicePromptResponse: servicePromptResponse,
-                    promptServiceType: promptServiceType
+                    promptServiceType: promptServiceType,
+                    promptType: request.promptType !== undefined ? request.promptType : PromptType.Recipe
                 });
 
                 if (!currentPromptResponse.success) {

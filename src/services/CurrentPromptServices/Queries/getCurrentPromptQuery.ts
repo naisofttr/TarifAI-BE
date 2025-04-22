@@ -5,6 +5,7 @@ import { CreateCombinationCommand } from '../../CombinationServices/Commands/cre
 import { GetPromptService } from '../../Prompt/Queries/GetPromptService';
 import { GetCombinationQuery } from '../../CombinationServices/Queries/getCombinationQuery';
 import { IngredientRequestDto } from '../../../dtos/Ingredients/ingredient-request.dto';
+import { PromptType } from '../../../enums/PromptType';
 
 interface CurrentPromptResponse {
     success: boolean;
@@ -15,7 +16,31 @@ interface CurrentPromptResponse {
 export class GetCurrentPromptQuery {
     async execute(req: Request): Promise<CurrentPromptResponse> {
         try {
-            const { ingredientData, languageCode } = req.body;
+            const { ingredientData, languageCode, promptType } = req.body;
+            
+            // promptType'ı uygun PromptType enum değerine dönüştür
+            let promptTypeEnum: PromptType | undefined = undefined;
+            
+            if (promptType !== undefined) {
+                if (typeof promptType === 'string') {
+                    const promptTypeLower = promptType.toLowerCase();
+                    if (promptTypeLower === 'recipe') {
+                        promptTypeEnum = PromptType.Recipe;
+                    } else if (promptTypeLower === 'menu') {
+                        promptTypeEnum = PromptType.Menu;
+                    }
+                } else if (typeof promptType === 'number') {
+                    // Eğer doğrudan enum değeri olarak geldiyse
+                    if (promptType === PromptType.Recipe || promptType === PromptType.Menu) {
+                        promptTypeEnum = promptType;
+                    }
+                }
+            }
+            
+            // Varsayılan değer olarak Recipe kullan
+            if (promptTypeEnum === undefined) {
+                promptTypeEnum = PromptType.Recipe;
+            }
             
             // Önce GetCombinationQuery'yi çağır
             const getCombinationQuery = new GetCombinationQuery();
@@ -27,6 +52,8 @@ export class GetCurrentPromptQuery {
                 
                 // currentPrompts koleksiyonunda combinationId'ye göre arama yap
                 const promptRef = ref(database, 'currentPrompts');
+                
+                // Hem combinationId hem de promptType ile eşleşen kayıtları filtrele
                 const promptQuery = query(
                     promptRef,
                     orderByChild('combinationId'),
@@ -37,33 +64,73 @@ export class GetCurrentPromptQuery {
                 console.log('Snapshot exists:', currentPromptSnapshot.exists());
                 
                 if (currentPromptSnapshot.exists()) {
-                    // İlk eşleşen prompt'u al
-                    const promptData = Object.values(currentPromptSnapshot.val())[0];
-                    console.log('Found prompt:', promptData);
+                    // Tüm eşleşen promptları al
+                    const allPrompts = Object.values(currentPromptSnapshot.val());
                     
-                    return {
-                        success: true,
-                        data: promptData,
-                        errorMessage: 'Current prompt found in database'
-                    };
+                    // promptType'a göre filtreleme yap
+                    const matchingPrompts = allPrompts.filter((prompt: any) => 
+                        prompt.promptType === promptTypeEnum
+                    );
+                    
+                    if (matchingPrompts.length > 0) {
+                        // İstenen promptType'a sahip bir kayıt bulundu
+                        console.log('Found prompt with matching promptType:', matchingPrompts[0]);
+                        
+                        return {
+                            success: true,
+                            data: matchingPrompts[0],
+                            errorMessage: 'Current prompt found in database'
+                        };
+                    } else {
+                        // combination bulundu ama istenen promptType için kayıt yoksa, yeni prompt oluştur
+                        const getPromptService = new GetPromptService();
+                        const promptRequest = {
+                            prompt: ingredientData,
+                            languageCode: languageCode,
+                            promptType: promptTypeEnum
+                        };
+                        
+                        const promptResponse = await getPromptService.getPromptResponse(
+                            promptRequest, 
+                            req, 
+                            combinationResult.data
+                        );
+                        
+                        if (!promptResponse.success) {
+                            return {
+                                success: false,
+                                errorMessage: 'Failed to get prompt response'
+                            };
+                        }
+                        
+                        return {
+                            success: true,
+                            data: promptResponse.data,
+                            errorMessage: `New prompt created for existing combination with promptType: ${promptTypeEnum}`
+                        };
+                    }
                 } else {
                     // combination bulundu ama currentPrompt kaydı yoksa, yeni prompt oluşturulacak
                     const getPromptService = new GetPromptService();
                     const promptRequest = {
                         prompt: ingredientData,
-                        languageCode: languageCode
+                        languageCode: languageCode,
+                        promptType: promptTypeEnum
                     };
+                    
                     const promptResponse = await getPromptService.getPromptResponse(
                         promptRequest, 
                         req, 
                         combinationResult.data
                     );
+                    
                     if (!promptResponse.success) {
                         return {
                             success: false,
                             errorMessage: 'Failed to get prompt response'
                         };
                     }
+                    
                     return {
                         success: true,
                         data: promptResponse.data,
@@ -87,7 +154,8 @@ export class GetCurrentPromptQuery {
             const getPromptService = new GetPromptService();
             const promptRequest = {
                 prompt: ingredientData,
-                languageCode: languageCode
+                languageCode: languageCode,
+                promptType: promptTypeEnum
             };
 
             const promptResponse = await getPromptService.getPromptResponse(
