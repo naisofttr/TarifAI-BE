@@ -1,4 +1,5 @@
 import { PromptServiceType } from "../enums/PromptServiceType";
+import { PromptType } from "../enums/PromptType";
 
 export interface CurrentPrompt {
     id: string;
@@ -7,6 +8,7 @@ export interface CurrentPrompt {
     servicePromptResponse: string;
     confirmedCount: number;
     promptServiceType: PromptServiceType;
+    promptType: PromptType;
     createdAt?: string;
     updatedAt?: string;
 }

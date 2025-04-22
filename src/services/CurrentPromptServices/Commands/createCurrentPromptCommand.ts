@@ -16,6 +16,7 @@ export class CreateCurrentPromptCommand {
                 languageCode: request.languageCode,
                 servicePromptResponse: request.servicePromptResponse,
                 promptServiceType: request.promptServiceType,
+                promptType: request.promptType,
                 confirmedCount: 0,
                 createdAt: new Date().toISOString()
             };

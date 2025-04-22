@@ -5,6 +5,7 @@ import { CurrentPrompt, CreatedCurrentPromptResponse } from '../../../models/cur
 import { v4 as uuidv4 } from 'uuid';
 import { PromptServiceType } from '../../../enums/PromptServiceType';
 import { CreateCurrentPromptArrayDto, CurrentPromptArrayItemDto } from '../../../dtos/CurrentPrompt/CreateCurrentPromptArrayDto';
+import { PromptType } from '../../../enums/PromptType';
 
 export class CreateCurrentPromptArrayCommand {
     async execute(request: CreateCurrentPromptArrayDto | any[]): Promise<CreatedCurrentPromptResponse> {
@@ -20,7 +21,8 @@ export class CreateCurrentPromptArrayCommand {
                     return {
                         combinationId: item.combinationId,
                         promptServiceType: item.promptServiceType,
-                        servicePromptResponse: item.servicePromptResponse
+                        servicePromptResponse: item.servicePromptResponse,
+                        promptType: item.promptType || PromptType.Recipe // Varsayılan olarak General tipi atanıyor
                     };
                 });
             } else if (request && Array.isArray(request)) {
@@ -37,7 +39,8 @@ export class CreateCurrentPromptArrayCommand {
                     combinationId: item.combinationId,
                     languageCode: 'tr', // Varsayılan dil kodu
                     servicePromptResponse: item.servicePromptResponse,
-                    promptServiceType: item.promptServiceType
+                    promptServiceType: item.promptServiceType,
+                    promptType: item.promptType || PromptType.Recipe // Varsayılan olarak General tipi atanıyor
                 };
                 
                 const id = uuidv4();
@@ -49,6 +52,7 @@ export class CreateCurrentPromptArrayCommand {
                     languageCode: currentPromptDto.languageCode,
                     servicePromptResponse: currentPromptDto.servicePromptResponse,
                     promptServiceType: currentPromptDto.promptServiceType,
+                    promptType: currentPromptDto.promptType,
                     confirmedCount: 0,
                     createdAt: new Date().toISOString()
                 };
