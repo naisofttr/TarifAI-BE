@@ -18,13 +18,13 @@ export class CreateCurrentPromptArrayCommand {
                 // Handle array input format from example
                 dataItems = request.map(item => {
                     return {
-                        combinationId: item.data.combinationId,
-                        promptServiceType: item.data.promptServiceType,
-                        servicePromptResponse: item.data.servicePromptResponse
+                        combinationId: item.combinationId,
+                        promptServiceType: item.promptServiceType,
+                        servicePromptResponse: item.servicePromptResponse
                     };
                 });
-            } else if (request.data && Array.isArray(request.data)) {
-                dataItems = request.data;
+            } else if (request && Array.isArray(request)) {
+                dataItems = request;
             } else {
                 return {
                     success: false,
