@@ -22,7 +22,7 @@ export class CreateCurrentPromptArrayCommand {
                         combinationId: item.combinationId,
                         promptServiceType: item.promptServiceType,
                         servicePromptResponse: item.servicePromptResponse,
-                        promptType: item.promptType || PromptType.Recipe // Varsayılan olarak General tipi atanıyor
+                        promptType: item.promptType || PromptType.Recipe // Varsayılan olarak Recipe tipi atanıyor
                     };
                 });
             } else if (request && Array.isArray(request)) {
@@ -40,7 +40,7 @@ export class CreateCurrentPromptArrayCommand {
                     languageCode: 'tr', // Varsayılan dil kodu
                     servicePromptResponse: item.servicePromptResponse,
                     promptServiceType: item.promptServiceType,
-                    promptType: item.promptType || PromptType.Recipe // Varsayılan olarak General tipi atanıyor
+                    promptType: item.promptType || PromptType.Recipe // Varsayılan olarak Recipe tipi atanıyor
                 };
                 
                 const id = uuidv4();
