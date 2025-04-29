@@ -2,14 +2,19 @@ import axios, { AxiosError } from 'axios';
 import { ChatGPTResponse } from '../../dtos/ChatGPT/ChatGPTResponseDto';
 import { generatePromptContent } from '../../utils/promptContentGenerator';
 import { IngredientCategoriesDto } from '../../dtos/Ingredients/ingredient-request.dto';
+import { PromptType } from '../../enums/PromptType';
 
 export const getChatGptPrompt = async (
     endpoint: string,
     apiKey: string,
     languageCode: string,
-    prompt: IngredientCategoriesDto
+    prompt: IngredientCategoriesDto,
+    promptType: PromptType = PromptType.Recipe
 ): Promise<ChatGPTResponse> => {
     try {
+        // promptType'ı string formatına çevir
+        const promptTypeStr = promptType === PromptType.Recipe ? 'recipe' : 'menu';
+
         const response = await axios.post<ChatGPTResponse>(
             endpoint,
             {
@@ -17,7 +22,7 @@ export const getChatGptPrompt = async (
                 messages: [
                     {
                         role: "user",
-                        content: generatePromptContent(languageCode, prompt)
+                        content: generatePromptContent(languageCode, prompt, promptTypeStr)
                     }
                 ],
                 max_tokens: 2500,

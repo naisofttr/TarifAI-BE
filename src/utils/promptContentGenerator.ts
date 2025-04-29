@@ -1,6 +1,9 @@
 import { IngredientCategoriesDto } from "../dtos/Ingredients/ingredient-request.dto";
 
-export const generatePromptContent = (languageCode: string, ingredients: IngredientCategoriesDto): string => {
+export const generatePromptContent = (languageCode: string, ingredients: IngredientCategoriesDto, promptType: 'recipe' | 'menu' = 'recipe'): string => {
+    // promptType'a göre liste adını belirle
+    const listName = promptType === 'recipe' ? 'recipeList' : 'menuList';
+
     // Prompt template'ini oluştur
     const promptTemplate = [
         `You are a professional chef. Please respond in ${languageCode}.`,
@@ -8,9 +11,9 @@ export const generatePromptContent = (languageCode: string, ingredients: Ingredi
         'Available ingredients (in JSON format):',
         JSON.stringify(ingredients, null, 2),
         '',
-        'Using these ingredients, suggest possible recipes. Your response MUST be in the following JSON format ONLY:',
+        `Using these ingredients, suggest possible ${promptType}s. Your response MUST be in the following JSON format ONLY:`,
         '{',
-        '  "recipeList": [',
+        `  "${listName}": [`,
         '    {',
         '      "title": "recipe name",',
         '      "type": "main course/appetizer/dessert/soup/salad",',

@@ -35,11 +35,15 @@ export class GetPromptService {
 
             // Eğer sonuç dönmezse, ChatGpt API'sine istek at
             if (response === undefined){
+                // promptType değerini belirle, varsayılan olarak Recipe kullan
+                const promptType = request.promptType !== undefined ? request.promptType : PromptType.Recipe;
+                
                 const responseChatGpt = await getChatGptPrompt(
                     this.gptEndpoint,
                     this.gptApiKey,
                     request.languageCode,
-                    request.prompt
+                    request.prompt,
+                    promptType
                 );
                 console.log(responseChatGpt);
                 promptServiceType = PromptServiceType.ChatGpt;
