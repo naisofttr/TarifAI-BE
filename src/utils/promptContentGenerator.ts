@@ -11,22 +11,15 @@ export const generatePromptContent = (languageCode: string, ingredients: Ingredi
         'Available ingredients (in JSON format):',
         JSON.stringify(ingredients, null, 2),
         '',
-        `Using these ingredients, suggest possible ${promptType}s. Your response MUST be in the following JSON format ONLY:`,
-        '{',
-        `  "${listName}": [`,
-        '    {',
-        '      "title": "recipe name",',
-        '      "type": "main course/appetizer/dessert/soup/salad",',
-        '      "missingIngredientCount": "number of missing ingredients needed (0 if all ingredients are available)"',
-        '    }',
-        '  ]',
-        '}',
+        `Using these ingredients, suggest possible ${promptType}s. Your response MUST be in the following JSON format:`,
+        `{"${listName}": [{"title": "recipe name", "type": "main course/appetizer/dessert/soup/salad", "missingIngredientCount": number of missing ingredients needed (0 if all ingredients are available)}]}`,
         '',
         'Important:',
-        '1. Response must be ONLY in the specified JSON format, no additional text',
-        '2. Only suggest recipes that can be made with the provided ingredients',
-        '3. If a recipe needs additional ingredients not in the list, include it but set the correct missingIngredientCount',
-        '4. Ensure the response is valid JSON'
+        '1. Response must be ONLY the specified JSON format, NO markdown formatting, NO code blocks, NO additional text',
+        '2. Do NOT wrap your response in ```json or ``` marks',
+        '3. Only suggest recipes that can be made with the provided ingredients',
+        '4. If a recipe needs additional ingredients not in the list, include it but set the correct missingIngredientCount',
+        '5. Ensure the response is valid JSON'
     ];
 
     // Template'i birleştir ve düzenli bir format oluştur

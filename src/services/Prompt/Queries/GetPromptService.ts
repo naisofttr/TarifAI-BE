@@ -45,7 +45,6 @@ export class GetPromptService {
                     request.prompt,
                     promptType
                 );
-                console.log(responseChatGpt);
                 promptServiceType = PromptServiceType.ChatGpt;
                 response = responseChatGpt;
             }
