@@ -7,6 +7,7 @@ import { PromptServiceType } from '../../../enums/PromptServiceType';
 import { CreateCurrentPromptCommand } from '../../CurrentPromptServices/Commands/createCurrentPromptCommand';
 import { CreateCurrentPromptDto } from '../../../dtos/CurrentPrompt/CreateCurrentPromptDto';
 import { PromptType } from '../../../enums/PromptType';
+import { formatPromptResponse } from '../../../utils/responseFormatter';
 
 export class GetPromptService {
     private gptApiKey: string;
@@ -51,27 +52,25 @@ export class GetPromptService {
 
             if (response.choices && response.choices.length > 0) {
                 const servicePromptResponse = response.choices[0].message.content;
-                // Parse the response string into CreateCurrentPromptDto[]
-                let currentPrompt: CreateCurrentPromptDto;
+                // Parse the response string into CurrentPromptDto
+                let parsedResponse;
                 try {
                     // Check if the response is already in JSON format
                     if (servicePromptResponse.trim().startsWith('{')) {
-                        currentPrompt = JSON.parse(servicePromptResponse);
+                        parsedResponse = JSON.parse(servicePromptResponse);
                     } else {
                         // If not JSON, create a JSON structure from the markdown response
-                        currentPrompt = {
-                            combinationId: combinationId,
-                            promptServiceType: promptServiceType,
-                            currentPrompts: servicePromptResponse
-                        };
+                        parsedResponse = { error: 'Received non-JSON response' };
                     }
                 } catch (error) {
                     console.error('Error parsing response:', error);
                     throw new Error(`Failed to process AI response: ${error}`);
                 }
-                currentPrompt.combinationId = combinationId;
-                currentPrompt.promptServiceType = promptServiceType;
                 
+                // Yanıt tarihini oluştur
+                const createdAt = new Date().toISOString();
+                
+                // Firebase'e kaydetmek için CreateCurrentPromptCommand'i çağır
                 const createCurrentPromptCommand = new CreateCurrentPromptCommand();
                 const currentPromptResponse = await createCurrentPromptCommand.execute({
                     combinationId: combinationId,
@@ -84,9 +83,23 @@ export class GetPromptService {
                 if (!currentPromptResponse.success) {
                     throw new Error(currentPromptResponse.errorMessage);
                 }
+                
+                // Ortak formatı kullanarak yanıt formatını oluştur
+                const formattedResponse = formatPromptResponse(
+                    parsedResponse,
+                    {
+                        combinationId: combinationId,
+                        promptServiceType: promptServiceType,
+                        promptType: request.promptType !== undefined ? request.promptType : PromptType.Recipe,
+                        languageCode: request.languageCode,
+                        confirmedCount: 0,
+                        createdAt: createdAt,
+                        id: currentPromptResponse.data?.id || ''
+                    }
+                );
 
                 return {
-                    data: currentPrompt,
+                    data: formattedResponse,
                     message: currentPromptResponse.errorMessage || '',
                     confirmedCount: 0,
                     success: true

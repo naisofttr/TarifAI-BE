@@ -7,6 +7,7 @@ import { GetCombinationQuery } from '../../CombinationServices/Queries/getCombin
 import { IngredientRequestDto } from '../../../dtos/Ingredients/ingredient-request.dto';
 import { PromptType } from '../../../enums/PromptType';
 import { PromptServiceType } from '../../../enums/PromptServiceType';
+import { formatPromptResponse } from '../../../utils/responseFormatter';
 
 // Firebase prompt için interface tanımı
 interface FirebasePrompt {
@@ -101,17 +102,19 @@ export class GetCurrentPromptQuery {
                             parsedPromptResponse = { error: 'Failed to parse prompt response' };
                         }
                         
-                        // Tüm gerekli alanları içeren yeni bir yanıt formatı oluştur
-                        const formattedResponse = {
-                            ...parsedPromptResponse,
-                            combinationId: firebasePrompt.combinationId,
-                            promptServiceType: firebasePrompt.promptServiceType,
-                            confirmedCount: firebasePrompt.confirmedCount || 0,
-                            createdAt: firebasePrompt.createdAt,
-                            id: firebasePrompt.id,
-                            languageCode: firebasePrompt.languageCode,
-                            promptType: firebasePrompt.promptType
-                        };
+                        // Ortak formatı kullanarak yanıt formatını oluştur
+                        const formattedResponse = formatPromptResponse(
+                            parsedPromptResponse,
+                            {
+                                combinationId: firebasePrompt.combinationId,
+                                promptServiceType: firebasePrompt.promptServiceType,
+                                promptType: firebasePrompt.promptType,
+                                languageCode: firebasePrompt.languageCode,
+                                confirmedCount: firebasePrompt.confirmedCount || 0,
+                                createdAt: firebasePrompt.createdAt,
+                                id: firebasePrompt.id
+                            }
+                        );
                         
                         return {
                             success: true,
