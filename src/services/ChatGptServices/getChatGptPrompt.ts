@@ -35,7 +35,7 @@ export const getChatGptPrompt = async (
                 }
             }
         );
-        
+        console.log('ChatGPT API Response:', response.data);
         return response.data;
     } catch (error) {
         if (error instanceof AxiosError) {

@@ -38,7 +38,6 @@ export class GetCombinationQuery {
             snapshot.forEach((childSnapshot) => {
                 const combination = childSnapshot.val();
                 console.log("--- FIREBASE'DEN GELEN NESNE ---");
-                console.log(JSON.stringify(combination, null, 2));
 
                 // Hem combination.ingredients hem combination.ingredientData desteği
                 const combinationIngredients = combination.ingredients || combination.ingredientData;
@@ -79,8 +78,6 @@ export class GetCombinationQuery {
 
     private compareIngredients(dbIngredient: any, requestIngredient: any): boolean {
         console.log('Karşılaştırılan veriler:');
-        console.log('Veritabanındaki veri:', JSON.stringify(dbIngredient, null, 2));
-        console.log('Request verisi:', JSON.stringify(requestIngredient, null, 2));
 
         // Null kontrolleri
         if (!dbIngredient || !requestIngredient) {
