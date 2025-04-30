@@ -6,6 +6,19 @@ import { GetPromptService } from '../../Prompt/Queries/GetPromptService';
 import { GetCombinationQuery } from '../../CombinationServices/Queries/getCombinationQuery';
 import { IngredientRequestDto } from '../../../dtos/Ingredients/ingredient-request.dto';
 import { PromptType } from '../../../enums/PromptType';
+import { PromptServiceType } from '../../../enums/PromptServiceType';
+
+// Firebase prompt için interface tanımı
+interface FirebasePrompt {
+    combinationId: string;
+    promptServiceType: PromptServiceType;
+    promptType: PromptType;
+    confirmedCount?: number;
+    createdAt: string;
+    id: string;
+    languageCode: string;
+    servicePromptResponse: string;
+}
 
 interface CurrentPromptResponse {
     success: boolean;
@@ -65,10 +78,10 @@ export class GetCurrentPromptQuery {
                 
                 if (currentPromptSnapshot.exists()) {
                     // Tüm eşleşen promptları al
-                    const allPrompts = Object.values(currentPromptSnapshot.val());
+                    const allPrompts = Object.values(currentPromptSnapshot.val()) as FirebasePrompt[];
                     
                     // promptType'a göre filtreleme yap
-                    const matchingPrompts = allPrompts.filter((prompt: any) => 
+                    const matchingPrompts = allPrompts.filter((prompt: FirebasePrompt) => 
                         prompt.promptType === promptTypeEnum
                     );
                     
@@ -76,9 +89,33 @@ export class GetCurrentPromptQuery {
                         // İstenen promptType'a sahip bir kayıt bulundu
                         console.log('Found prompt with matching promptType:', matchingPrompts[0]);
                         
+                        // Firebase'den gelen promptu al
+                        const firebasePrompt: FirebasePrompt = matchingPrompts[0];
+                        
+                        // Firebase'den gelen servicePromptResponse'u JSON nesnesine çevir
+                        let parsedPromptResponse;
+                        try {
+                            parsedPromptResponse = JSON.parse(firebasePrompt.servicePromptResponse);
+                        } catch (error) {
+                            console.error('Error parsing servicePromptResponse:', error);
+                            parsedPromptResponse = { error: 'Failed to parse prompt response' };
+                        }
+                        
+                        // Tüm gerekli alanları içeren yeni bir yanıt formatı oluştur
+                        const formattedResponse = {
+                            ...parsedPromptResponse,
+                            combinationId: firebasePrompt.combinationId,
+                            promptServiceType: firebasePrompt.promptServiceType,
+                            confirmedCount: firebasePrompt.confirmedCount || 0,
+                            createdAt: firebasePrompt.createdAt,
+                            id: firebasePrompt.id,
+                            languageCode: firebasePrompt.languageCode,
+                            promptType: firebasePrompt.promptType
+                        };
+                        
                         return {
                             success: true,
-                            data: matchingPrompts[0],
+                            data: formattedResponse,
                             errorMessage: 'Current prompt found in database'
                         };
                     } else {
