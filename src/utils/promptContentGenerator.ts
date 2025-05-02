@@ -12,7 +12,7 @@ export const generatePromptContent = (languageCode: string, ingredients: Ingredi
         JSON.stringify(ingredients, null, 2),
         '',
         `Using these ingredients, suggest possible ${promptType}s. Your response MUST be in the following JSON format:`,
-        `{"${listName}": [{"title": "recipe name in ${languageCode} language", "type": "main course/appetizer/dessert/soup/salad", "missingIngredientCount": number of missing ingredients needed (0 if all ingredients are available)}]}`,
+        `{"${listName}": [{"id": "auto-generated-uuid", "title": "recipe name in ${languageCode} language", "type": "main course/appetizer/dessert/soup/salad", "missingIngredientCount": number of missing ingredients needed (0 if all ingredients are available)}]}`,
         '',
         'Important:',
         '1. Response must be ONLY the specified JSON format, NO markdown formatting, NO code blocks, NO additional text',
@@ -21,7 +21,8 @@ export const generatePromptContent = (languageCode: string, ingredients: Ingredi
         '4. If a recipe needs additional ingredients not in the list, include it but set the correct missingIngredientCount',
         '5. Ensure the response is valid JSON',
         `6. VERY IMPORTANT: ALL text values must be in ${languageCode} language, especially "title" and "type" fields`,
-        `7. Do not respond in English if ${languageCode} is different, translate ALL text to ${languageCode}`
+        `7. Do not respond in English if ${languageCode} is different, translate ALL text to ${languageCode}`,
+        '8. For each recipe, generate a unique ID in UUID format (e.g., "550e8400-e29b-41d4-a716-446655440000")'
     ];
 
     // Template'i birleştir ve düzenli bir format oluştur
