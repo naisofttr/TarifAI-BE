@@ -27,8 +27,10 @@ export class GetRecipeDetailQuery {
       const recipeId = req.params.recipeId;
       const languageCode = req.query.languageCode as string || 'tr';
       
-      // UUID formatı kontrolü (basit bir regex kontrol)
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(recipeId);
+      // API anahtarı kontrolü
+      if (!this.gptApiKey) {
+        console.warn('OPENAI_API_KEY ortam değişkeni tanımlanmamış. ChatGPT özellikleri devre dışı.');
+      }
 
       // Firebase'de tarif var mı kontrol et
       const recipeRef = ref(database, `recipes/${recipeId}`);
@@ -63,13 +65,6 @@ export class GetRecipeDetailQuery {
         let recipeType = '';
         let foundRecipeData = false;
         
-        // UUID formatındaki ID'ler için varsayılan değerler
-        if (isUuid) {
-          recipeTitle = 'Tarif';
-          recipeType = 'main course';
-          foundRecipeData = true; // UUID formatında ID varsa, ChatGPT'den doğrudan tarif detayı alınacak
-        }
-        
         // currentPrompts içinde recipeId ile eşleşen bir başlık var mı kontrol et
         for (const recipe of allRecipes) {
           if (recipe.servicePromptResponse) {
@@ -80,7 +75,15 @@ export class GetRecipeDetailQuery {
               const list = parsedResponse.recipeList || parsedResponse.menuList || [];
               
               for (const item of list) {
-                // ID olarak kullanılabilecek normalize edilmiş başlık
+                // Öncelikle item.id ile recipeId'yi karşılaştır
+                if (item.id === recipeId) {
+                  recipeTitle = item.title;
+                  recipeType = item.type;
+                  foundRecipeData = true;
+                  break;
+                }
+                
+                // Eğer id ile eşleşme yoksa, normalize edilmiş başlık ile dene (geriye dönük uyumluluk için)
                 const normalizedTitle = item.title
                   .toLowerCase()
                   .replace(/\s+/g, '-') // boşlukları tire ile değiştir
@@ -110,11 +113,11 @@ export class GetRecipeDetailQuery {
           recipeType = 'main course';
         }
         
-        // API anahtarı yoksa ve UUID formatında bir ID ile istek yapılıyorsa, hata döndür
-        if (!this.gptApiKey && isUuid) {
+        // API anahtarı yoksa, hata döndür
+        if (!this.gptApiKey) {
           return {
             success: false,
-            errorMessage: 'OpenAI API anahtarı tanımlanmamış. UUID formatındaki ID ile tarif detayı alınamıyor.'
+            errorMessage: 'OpenAI API anahtarı tanımlanmamış. Tarif detayı alınamıyor.'
           };
         }
         
@@ -159,19 +162,17 @@ export class GetRecipeDetailQuery {
           
           // Unique ID atama
           recipeDetail.id = recipeId;
-          recipeDetail.combinationId = uuidv4();
           recipeDetail.languageCode = languageCode;
           recipeDetail.createdAt = new Date().toISOString();
           
           // Firebase'e kaydet
-          const newRecipeRef = ref(database, `recipes/${recipeId}`);
+          const newRecipeRef = ref(database, `recipes/${recipeDetail.id}`);
           await set(newRecipeRef, recipeDetail);
           
           // Yanıtı formatla
           const formattedResponse = formatPromptResponse(
             recipeDetail,
             {
-              combinationId: recipeDetail.combinationId,
               promptServiceType: PromptServiceType.ChatGpt,
               promptType: 0, // Recipe tipi
               languageCode: languageCode,

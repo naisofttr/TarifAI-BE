@@ -7,7 +7,7 @@ import { PromptType } from '../enums/PromptType';
 export const formatPromptResponse = (
     contentData: any,
     metadata: {
-        combinationId: string;
+        combinationId?: string;
         promptServiceType: PromptServiceType;
         promptType: PromptType;
         languageCode: string;
@@ -18,9 +18,8 @@ export const formatPromptResponse = (
 ) => {
     try {
         // Temel metadata değerlerini belirle
-        const formattedResponse = {
+        const formattedResponse: any = {
             ...contentData,
-            combinationId: metadata.combinationId,
             promptServiceType: metadata.promptServiceType,
             promptType: metadata.promptType,
             languageCode: metadata.languageCode,
@@ -29,12 +28,16 @@ export const formatPromptResponse = (
             id: metadata.id || ''
         };
         
+        // combinationId varsa ekle
+        if (metadata.combinationId) {
+            formattedResponse.combinationId = metadata.combinationId;
+        }
+        
         return formattedResponse;
     } catch (error) {
         console.error('Error in formatPromptResponse:', error);
-        return {
+        const errorResponse: any = {
             error: 'Failed to format prompt response',
-            combinationId: metadata.combinationId,
             promptServiceType: metadata.promptServiceType,
             promptType: metadata.promptType,
             languageCode: metadata.languageCode,
@@ -42,5 +45,12 @@ export const formatPromptResponse = (
             createdAt: metadata.createdAt || new Date().toISOString(),
             id: metadata.id || ''
         };
+        
+        // combinationId varsa ekle
+        if (metadata.combinationId) {
+            errorResponse.combinationId = metadata.combinationId;
+        }
+        
+        return errorResponse;
     }
 }; 
