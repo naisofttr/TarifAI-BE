@@ -1,6 +1,12 @@
 import { Request, Response } from 'express';
 import { GetRecipeDetailQuery } from '../services/RecipeServices/Queries/getRecipeDetailQuery';
 
+/**
+ * @description Belirtilen ID'ye sahip tarifin detaylarını getirir
+ * @param req Express Request nesnesi
+ * @param res Express Response nesnesi
+ * @returns Tarif detayları
+ */
 export const getRecipeDetail = async (req: Request, res: Response) => {
   try {
     const getRecipeDetailQuery = new GetRecipeDetailQuery();
@@ -15,4 +21,4 @@ export const getRecipeDetail = async (req: Request, res: Response) => {
       errorMessage: error instanceof Error ? error.message : 'Unexpected error occurred'
     });
   }
-}; 
+};

@@ -26,6 +26,9 @@ export class GetRecipeDetailQuery {
     try {
       const recipeId = req.params.recipeId;
       const languageCode = req.query.languageCode as string || 'tr';
+      
+      // UUID formatı kontrolü (basit bir regex kontrol)
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(recipeId);
 
       // Firebase'de tarif var mı kontrol et
       const recipeRef = ref(database, `recipes/${recipeId}`);
@@ -59,6 +62,13 @@ export class GetRecipeDetailQuery {
         let recipeTitle = '';
         let recipeType = '';
         let foundRecipeData = false;
+        
+        // UUID formatındaki ID'ler için varsayılan değerler
+        if (isUuid) {
+          recipeTitle = 'Tarif';
+          recipeType = 'main course';
+          foundRecipeData = true; // UUID formatında ID varsa, ChatGPT'den doğrudan tarif detayı alınacak
+        }
         
         // currentPrompts içinde recipeId ile eşleşen bir başlık var mı kontrol et
         for (const recipe of allRecipes) {
@@ -98,6 +108,14 @@ export class GetRecipeDetailQuery {
           // Örnek bir başlık ve tür belirle, daha iyi bir çözüm bulunamadıysa
           recipeTitle = recipeId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
           recipeType = 'main course';
+        }
+        
+        // API anahtarı yoksa ve UUID formatında bir ID ile istek yapılıyorsa, hata döndür
+        if (!this.gptApiKey && isUuid) {
+          return {
+            success: false,
+            errorMessage: 'OpenAI API anahtarı tanımlanmamış. UUID formatındaki ID ile tarif detayı alınamıyor.'
+          };
         }
         
         // Tarif detayını ChatGPT'den al

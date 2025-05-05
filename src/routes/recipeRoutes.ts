@@ -10,4 +10,4 @@ const router = express.Router();
  */
 router.get('/:recipeId', getRecipeDetail);
 
-export default router; 
+export default router;
