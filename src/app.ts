@@ -8,6 +8,7 @@ import mediaRoutes from './routes/mediaRoutes';
 import currentPromptRoutes from './routes/currentPromptRoutes';
 import combinationRoutes from './routes/combinationRoutes';
 import recipeRoutes from './routes/recipeRoutes';
+import recipeImageRoutes from './routes/recipeImageRoutes';
 import { initializeDatabase } from './config/database';
 
 // Creating express app
@@ -39,6 +40,7 @@ app.use('/api', mediaRoutes);
 app.use('/api', currentPromptRoutes);
 app.use('/api', combinationRoutes);
 app.use('/api/recipes', recipeRoutes);
+app.use('/api/recipe-images', recipeImageRoutes);
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: express.NextFunction) => {

@@ -3,10 +3,14 @@ import { ref, get, set } from 'firebase/database';
 import { v4 as uuidv4 } from 'uuid';
 import { database } from '../../../config/database';
 import { RecipeDetailResponseDto } from '../../../dtos/Recipes/recipe-detail.dto';
-import { PromptServiceType } from '../../../enums/PromptServiceType';
-import { getChatGptPrompt } from '../../ChatGptServices/getChatGptPrompt';
-import { generateRecipeDetailPrompt } from '../../../utils/recipeDetailPromptGenerator';
 import { formatPromptResponse } from '../../../utils/responseFormatter';
+import { generateRecipeDetailPrompt } from '../../../utils/recipeDetailPromptGenerator';
+import { PromptServiceType } from '../../../enums/PromptServiceType';
+import * as fs from 'fs';
+import * as path from 'path';
+import { storage } from '../../../config/firebase.config';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { GetRecipeImageByTypeQuery } from '../../RecipeImageServices/Queries/getRecipeImageByTypeQuery';
 
 interface FirebaseRecipe {
   servicePromptResponse: string;
@@ -16,10 +20,84 @@ interface FirebaseRecipe {
 export class GetRecipeDetailQuery {
   private gptApiKey: string;
   private gptEndpoint: string;
+  private imageEndpoint: string;
 
   constructor() {
     this.gptApiKey = process.env.OPENAI_API_KEY || '';
     this.gptEndpoint = process.env.OPENAI_ENDPOINT || 'https://api.openai.com/v1/chat/completions';
+    this.imageEndpoint = 'https://api.openai.com/v1/images/generations';
+  }
+  
+  /**
+   * Tarif için görsel oluşturur ve Firebase Storage'a kaydeder
+   * @param recipeTitle Tarif başlığı
+   * @param recipeType Tarif türü
+   * @param recipeId Tarif ID'si
+   * @param languageCode Dil kodu
+   * @returns Görsel URL'i
+   */
+  private async generateAndSaveRecipeImage(recipeTitle: string, recipeType: string, recipeId: string, languageCode: string = 'tr'): Promise<string | null> {
+    try {
+      // API anahtarı yoksa, null döndür
+      if (!this.gptApiKey) {
+        console.error('OpenAI API anahtarı tanımlanmamış. Görsel oluşturulamadı.');
+        return null;
+      }
+      
+      // Görsel oluşturmak için prompt hazırla
+      const imagePrompt = `A professional, appetizing photo of ${recipeTitle}, which is a ${recipeType} dish. The image should be high-quality, well-lit, and show the completed dish in a square composition that works well on mobile devices. Include garnishes, appropriate plating, and ensure the main dish is clearly visible and centered. The image should be optimized for mobile viewing with good contrast and clear details.`;
+      
+      // OpenAI API'sine istek gönder
+      const response = await fetch(this.imageEndpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.gptApiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: "dall-e-3",
+          prompt: imagePrompt,
+          n: 1,
+          size: "1024x1024",
+          quality: "standard",
+          response_format: "url"
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error from OpenAI Image API: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data.data || data.data.length === 0 || !data.data[0].url) {
+        throw new Error('No image URL in the response');
+      }
+      
+      const imageUrl = data.data[0].url;
+      
+      // Görseli indirme
+      const imageResponse = await fetch(imageUrl);
+      if (!imageResponse.ok) {
+        throw new Error(`Failed to download image: ${imageResponse.statusText}`);
+      }
+      
+      const imageBuffer = await imageResponse.arrayBuffer();
+      
+      // Firebase Storage'a yükleme
+      const imageFileName = `recipe_images/${recipeId}.jpg`;
+      const imageRef = storageRef(storage, imageFileName);
+      
+      await uploadBytes(imageRef, new Uint8Array(imageBuffer));
+      
+      // Yüklenen görselin URL'ini alma
+      const downloadUrl = await getDownloadURL(imageRef);
+      
+      return downloadUrl;
+    } catch (error) {
+      console.error('Error in generateAndSaveRecipeImage:', error);
+      return null;
+    }
   }
 
   async execute(req: Request): Promise<RecipeDetailResponseDto> {
@@ -139,7 +217,8 @@ export class GetRecipeDetailQuery {
               }
             ],
             max_tokens: 3000,
-            temperature: 0.7
+            temperature: 0.7,
+            response_format: { type: "json_object" }
           })
         });
         
@@ -164,6 +243,30 @@ export class GetRecipeDetailQuery {
           recipeDetail.id = recipeId;
           recipeDetail.languageCode = languageCode;
           recipeDetail.createdAt = new Date().toISOString();
+          
+          // Tarif görseli oluştur ve kaydet
+          try {
+            // Önce recipeImages tablosundan tarif tipine göre görsel var mı kontrol et
+            if (!recipeDetail.imageUrl && recipeType) {
+              const getRecipeImageQuery = new GetRecipeImageByTypeQuery();
+              const imageResult = await getRecipeImageQuery.execute(recipeType);
+              
+              if (imageResult.success && imageResult.data) {
+                recipeDetail.imageUrl = imageResult.data.imageUrl;
+              } else {
+                // recipeImages'da görsel bulunamadıysa, yeni görsel oluştur
+                const imageUrl = await this.generateAndSaveRecipeImage(recipeTitle, recipeType, recipeId, languageCode);
+                if (imageUrl) {
+                  recipeDetail.imageUrl = imageUrl;
+                }
+              }
+            } else {
+              // imageUrl zaten varsa, dokunma
+            }
+          } catch (imageError) {
+            console.error('Error handling recipe image:', imageError);
+            // Görsel işleme hatası olsa bile işleme devam et
+          }
           
           // Firebase'e kaydet
           const newRecipeRef = ref(database, `recipes/${recipeDetail.id}`);
