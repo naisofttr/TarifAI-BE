@@ -12,19 +12,27 @@ export const recipeImageController = {
    */
   createRecipeImage: async (req: Request, res: Response) => {
     try {
-      const { type, imageUrl } = req.body;
+      const { type } = req.body;
+      const file = req.file;
       
       // Gerekli alanları kontrol et
-      if (!type || !imageUrl) {
+      if (!type) {
         return res.status(400).json({
           success: false,
-          errorMessage: 'Type and imageUrl are required'
+          errorMessage: 'Tarif tipi gereklidir'
+        });
+      }
+      
+      if (!file) {
+        return res.status(400).json({
+          success: false,
+          errorMessage: 'Görsel dosyası gereklidir'
         });
       }
       
       // Görsel oluşturma servisini çağır
       const createRecipeImageCommand = new CreateRecipeImageCommand();
-      const result = await createRecipeImageCommand.execute(type, imageUrl);
+      const result = await createRecipeImageCommand.execute(type, file);
       
       if (result.success) {
         return res.status(201).json(result);
@@ -32,10 +40,10 @@ export const recipeImageController = {
         return res.status(400).json(result);
       }
     } catch (error) {
-      console.error('Error in createRecipeImage controller:', error);
+      console.error('createRecipeImage controller error:', error);
       return res.status(500).json({
         success: false,
-        errorMessage: `Internal server error: ${error instanceof Error ? error.message : 'Unknown error'}`
+        errorMessage: `Sunucu hatası: ${error instanceof Error ? error.message : 'Bilinmeyen bir hata'}`
       });
     }
   }
