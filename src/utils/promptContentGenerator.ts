@@ -12,7 +12,7 @@ export const generatePromptContent = (languageCode: string, ingredients: Ingredi
         JSON.stringify(ingredients, null, 2),
         '',
         `Using these ingredients, suggest possible ${promptType}s. Your response MUST be in the following JSON format:`,
-        `{"${listName}": [{"id": "auto-generated-uuid", "title": "recipe name in ${languageCode} language", "type": "main course/appetizer/dessert/soup/salad", "missingIngredientCount": number of missing ingredients needed (0 if all ingredients are available)}]}`,
+        `{"${listName}": [{"id": "auto-generated-uuid", "title": "Recipe name in ${languageCode} language", "type": "main course/appetizer/dessert/soup/salad", "missingIngredientCount": number of missing ingredients needed (0 if all ingredients are available)}]}`,
         '',
         'Important:',
         '1. Response must be ONLY the specified JSON format, NO markdown formatting, NO code blocks, NO additional text',

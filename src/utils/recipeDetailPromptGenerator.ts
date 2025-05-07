@@ -25,8 +25,8 @@ export const generateRecipeDetailPrompt = (
       "servings": number of servings,
       "ingredients": [
         {
-          "name": "ingredient name",
-          "amount": "amount with unit",
+          "name": "Ingredient name",
+          "amount": "Amount with unit",
           "isOptional": true/false
         }
       ],
