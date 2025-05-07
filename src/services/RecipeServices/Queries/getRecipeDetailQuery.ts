@@ -35,69 +35,12 @@ export class GetRecipeDetailQuery {
    * @param recipeId Tarif ID'si
    * @param languageCode Dil kodu
    * @returns Görsel URL'i
+   * @deprecated Görsel işlemleri devre dışı bırakıldı
    */
   private async generateAndSaveRecipeImage(recipeTitle: string, recipeType: string, recipeId: string, languageCode: string = 'tr'): Promise<string | null> {
-    try {
-      // API anahtarı yoksa, null döndür
-      if (!this.gptApiKey) {
-        console.error('OpenAI API anahtarı tanımlanmamış. Görsel oluşturulamadı.');
-        return null;
-      }
-      
-      // Görsel oluşturmak için prompt hazırla
-      const imagePrompt = `A professional, appetizing photo of ${recipeTitle}, which is a ${recipeType} dish. The image should be high-quality, well-lit, and show the completed dish in a square composition that works well on mobile devices. Include garnishes, appropriate plating, and ensure the main dish is clearly visible and centered. The image should be optimized for mobile viewing with good contrast and clear details.`;
-      
-      // OpenAI API'sine istek gönder
-      const response = await fetch(this.imageEndpoint, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.gptApiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: "dall-e-3",
-          prompt: imagePrompt,
-          n: 1,
-          size: "1024x1024",
-          quality: "standard",
-          response_format: "url"
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Error from OpenAI Image API: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      
-      if (!data.data || data.data.length === 0 || !data.data[0].url) {
-        throw new Error('No image URL in the response');
-      }
-      
-      const imageUrl = data.data[0].url;
-      
-      // Görseli indirme
-      const imageResponse = await fetch(imageUrl);
-      if (!imageResponse.ok) {
-        throw new Error(`Failed to download image: ${imageResponse.statusText}`);
-      }
-      
-      const imageBuffer = await imageResponse.arrayBuffer();
-      
-      // Firebase Storage'a yükleme
-      const imageFileName = `recipe_images/${recipeId}.jpg`;
-      const imageRef = storageRef(storage, imageFileName);
-      
-      await uploadBytes(imageRef, new Uint8Array(imageBuffer));
-      
-      // Yüklenen görselin URL'ini alma
-      const downloadUrl = await getDownloadURL(imageRef);
-      
-      return downloadUrl;
-    } catch (error) {
-      console.error('Error in generateAndSaveRecipeImage:', error);
-      return null;
-    }
+    // Görsel işlemleri devre dışı bırakıldı
+    console.log('Görsel oluşturma işlemi devre dışı bırakıldı');
+    return "";
   }
 
   async execute(req: Request): Promise<RecipeDetailResponseDto> {
@@ -244,28 +187,11 @@ export class GetRecipeDetailQuery {
           recipeDetail.languageCode = languageCode;
           recipeDetail.createdAt = new Date().toISOString();
           
-          // Tarif görseli oluştur ve kaydet
-          try {
-            // Önce recipeImages tablosundan tarif tipine göre görsel var mı kontrol et
-            if (!recipeDetail.imageUrl && recipeType) {
-              const getRecipeImageQuery = new GetRecipeImageByTypeQuery();
-              const imageResult = await getRecipeImageQuery.execute(recipeType);
-              
-              if (imageResult.success && imageResult.data) {
-                recipeDetail.imageUrl = imageResult.data.imageUrl;
-              } else {
-                // recipeImages'da görsel bulunamadıysa, yeni görsel oluştur
-                const imageUrl = await this.generateAndSaveRecipeImage(recipeTitle, recipeType, recipeId, languageCode);
-                if (imageUrl) {
-                  recipeDetail.imageUrl = imageUrl;
-                }
-              }
-            } else {
-              // imageUrl zaten varsa, dokunma
-            }
-          } catch (imageError) {
-            console.error('Error handling recipe image:', imageError);
-            // Görsel işleme hatası olsa bile işleme devam et
+          // Görsel işlemleri devre dışı bırakıldı
+          // Eğer imageUrl zaten varsa, değiştirme
+          if (!recipeDetail.imageUrl) {
+            // Mevcut imageUrl yoksa, boş bırak
+            // recipeDetail.imageUrl değiştirilmiyor
           }
           
           // Firebase'e kaydet
