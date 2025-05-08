@@ -118,26 +118,27 @@ export class GetCurrentPromptQuery {
                         );
                         
                         // Eğer recipeList veya menuList varsa ve imageUrl yoksa, görsel ekle
-                        if (parsedPromptResponse.recipeList || parsedPromptResponse.menuList) {
-                            const items = parsedPromptResponse.recipeList || parsedPromptResponse.menuList || [];
+                        // simdilik burası kapatıldı cunku gorseli suanda client tarafında yukluyoruz.
+                        // if (parsedPromptResponse.recipeList || parsedPromptResponse.menuList) {
+                        //     const items = parsedPromptResponse.recipeList || parsedPromptResponse.menuList || [];
                             
-                            // Her bir tarif için görsel kontrolü yap
-                            for (const item of items) {
-                                if (!item.imageUrl && item.type) {
-                                    try {
-                                        // Tarif tipine göre görsel al
-                                        const getRecipeImageQuery = new GetRecipeImageByTypeQuery();
-                                        const imageResult = await getRecipeImageQuery.execute(item.type);
+                        //     // Her bir tarif için görsel kontrolü yap
+                        //     for (const item of items) {
+                        //         if (!item.imageUrl && item.type) {
+                        //             try {
+                        //                 // Tarif tipine göre görsel al
+                        //                 const getRecipeImageQuery = new GetRecipeImageByTypeQuery();
+                        //                 const imageResult = await getRecipeImageQuery.execute(item.type);
                                         
-                                        if (imageResult.success && imageResult.data) {
-                                            item.imageUrl = imageResult.data.imageUrl;
-                                        }
-                                    } catch (error) {
-                                        console.error(`Error getting image for recipe type ${item.type}:`, error);
-                                    }
-                                }
-                            }
-                        }
+                        //                 if (imageResult.success && imageResult.data) {
+                        //                     item.imageUrl = imageResult.data.imageUrl;
+                        //                 }
+                        //             } catch (error) {
+                        //                 console.error(`Error getting image for recipe type ${item.type}:`, error);
+                        //             }
+                        //         }
+                        //     }
+                        // }
                         
                         return {
                             success: true,
