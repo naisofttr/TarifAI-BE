@@ -16,6 +16,7 @@ export interface RecipeModel {
   rating?: number;
   reviewCount?: number;
   combinationId?: string;
+  menuId?: string;
   languageCode?: string;
   createdAt: string;
-} 
+}

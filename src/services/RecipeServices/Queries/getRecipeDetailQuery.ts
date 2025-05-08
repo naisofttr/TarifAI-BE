@@ -1,16 +1,10 @@
 import { Request } from 'express';
 import { ref, get, set } from 'firebase/database';
-import { v4 as uuidv4 } from 'uuid';
 import { database } from '../../../config/database';
 import { RecipeDetailResponseDto } from '../../../dtos/Recipes/recipe-detail.dto';
 import { formatPromptResponse } from '../../../utils/responseFormatter';
 import { generateRecipeDetailPrompt } from '../../../utils/recipeDetailPromptGenerator';
 import { PromptServiceType } from '../../../enums/PromptServiceType';
-import * as fs from 'fs';
-import * as path from 'path';
-import { storage } from '../../../config/firebase.config';
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { GetRecipeImageByTypeQuery } from '../../RecipeImageServices/Queries/getRecipeImageByTypeQuery';
 
 interface FirebaseRecipe {
   servicePromptResponse: string;
@@ -20,12 +14,10 @@ interface FirebaseRecipe {
 export class GetRecipeDetailQuery {
   private gptApiKey: string;
   private gptEndpoint: string;
-  private imageEndpoint: string;
 
   constructor() {
     this.gptApiKey = process.env.OPENAI_API_KEY || '';
     this.gptEndpoint = process.env.OPENAI_ENDPOINT || 'https://api.openai.com/v1/chat/completions';
-    this.imageEndpoint = 'https://api.openai.com/v1/images/generations';
   }
   
   /**
