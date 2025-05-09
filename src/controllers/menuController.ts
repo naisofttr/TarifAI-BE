@@ -5,7 +5,7 @@ import { CreateMenuCommand } from '../services/MenuServices/Commands/createMenuC
 import { CreateMenuDto } from '../dtos/Menus/create-menu.dto';
 import { CreateRecipeCommand } from '../services/RecipeServices/Commands/createRecipeCommand';
 import { RecipeDetailDto } from '../dtos/Recipes/recipe-detail.dto';
-import { ref, set } from 'firebase/database';
+import { ref, set, update } from 'firebase/database';
 import { database } from '../config/database';
 
 export class MenuController {
@@ -79,7 +79,7 @@ export class MenuController {
                 
                 // Firebase'de menüyü güncelle
                 const menuRef = ref(database, `menus/${menu.id}`);
-                await set(menuRef, menu);
+                await update(menuRef, { recipeIds: menu.recipeIds });
             }
             
             return res.status(201).json({
@@ -135,7 +135,7 @@ export class MenuController {
                     
                     // Firebase'de menüyü güncelle
                     const menuRef = ref(database, `menus/${createdMenu.id}`);
-                    await set(menuRef, createdMenu);
+                    await update(menuRef, { recipeIds: createdMenu.recipeIds });
                 }
                 
                 results.push(createdMenu);

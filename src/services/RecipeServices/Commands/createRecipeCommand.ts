@@ -1,4 +1,4 @@
-import { ref, set } from 'firebase/database';
+import { ref, set, update } from 'firebase/database';
 import { v4 as uuidv4 } from 'uuid';
 import { database } from '../../../config/database';
 import { RecipeModel } from '../../../models/recipe';
@@ -33,14 +33,14 @@ export class CreateRecipeCommand {
         servings: recipeData.servings,
         ingredients: recipeData.ingredients,
         instructions: recipeData.instructions,
-        nutritionalValues: recipeData.nutritionalValues,
-        imageUrl: recipeData.imageUrl,
-        tags: recipeData.tags,
-        rating: recipeData.rating,
-        reviewCount: recipeData.reviewCount,
-        combinationId: recipeData.combinationId,
-        menuId: menuId || undefined,
-        languageCode: recipeData.languageCode,
+        nutritionalValues: recipeData.nutritionalValues || null,
+        imageUrl: recipeData.imageUrl || "",
+        tags: recipeData.tags || [],
+        rating: recipeData.rating || 0,
+        reviewCount: recipeData.reviewCount || 0,
+        combinationId: recipeData.combinationId || null,
+        menuId: menuId || null,
+        languageCode: recipeData.languageCode || "tr",
         createdAt: recipeData.createdAt || now
       };
       

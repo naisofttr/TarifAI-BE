@@ -10,13 +10,13 @@ export interface RecipeModel {
   servings?: number;
   ingredients: IngredientDto[];
   instructions: string[];
-  nutritionalValues?: NutritionalValuesDto;
+  nutritionalValues?: NutritionalValuesDto | null;
   imageUrl?: string;
   tags?: string[];
   rating?: number;
   reviewCount?: number;
-  combinationId?: string;
-  menuId?: string;
+  combinationId?: string | null;
+  menuId?: string | null;
   languageCode?: string;
   createdAt: string;
 }

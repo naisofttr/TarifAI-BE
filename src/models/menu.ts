@@ -8,7 +8,7 @@ export interface MenuModel {
   id: string;
   title: string;
   menuPromptType: MenuPromptType;
-  menuType: MenuType;
+  menuType: MenuType | null;
   recipeIds: string[];
   languageCode?: string;
   createdAt: string;
@@ -21,7 +21,7 @@ export interface MenuResponse {
   id: string;
   title: string;
   menuPromptType: MenuPromptType;
-  menuType: MenuType;
+  menuType: MenuType | null;
   recipeIds: string[];
   languageCode?: string;
   createdAt: string;
