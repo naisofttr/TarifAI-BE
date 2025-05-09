@@ -27,7 +27,8 @@
     "node-fetch": "^2.7.0",
     "openai": "^4.83.0",
     "reflect-metadata": "^0.2.2",
-    "uuid": "^11.0.5"
+    "uuid": "^11.0.5",
+    "zod": "^3.24.4"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
