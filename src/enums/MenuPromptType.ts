@@ -2,6 +2,7 @@
  * Menü prompt tipleri
  */
 export enum MenuPromptType {
+  chefMenu = "chefMenu",           // Şef menü
   guestMenu = "guestMenu",           // Akşama misafir menü
   dietMenu = "dietMenu",             // Diyet menü
   athleteMenu = "athleteMenu",       // Sporcu menü

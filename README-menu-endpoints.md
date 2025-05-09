@@ -18,6 +18,7 @@ Bu dokümantasyon, TarifAI API'sinin menü ile ilgili endpoint'lerini açıklar.
 | languageCode   | string | Dil kodu (örn: "tr", "en")                                 | Evet    |
 
 **Geçerli MenuPromptType Değerleri:**
+- `chefMenu` = (chefMenu),           // Şef menü
 - `guestMenu` (Akşama misafir menü)
 - `dietMenu` (Diyet menü)
 - `athleteMenu` (Sporcu menü)
