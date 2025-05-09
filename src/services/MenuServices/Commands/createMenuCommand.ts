@@ -41,7 +41,7 @@ export class CreateMenuCommand {
         for (const recipeId of createMenuDto.recipeIds) {
           const recipeRef = ref(database, `recipes/${recipeId}`);
           // Sadece menuId alanını güncelle
-          await set(recipeRef, { menuId: menuId }, { merge: true });
+          await set(recipeRef, { menuId: menuId });
         }
       }
       
