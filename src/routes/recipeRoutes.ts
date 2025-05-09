@@ -12,6 +12,11 @@ router.get('/:recipeId', (req, res) =>
     recipeController.getRecipeDetail(req, res)
 );
 
+// GET recipes by menu ID
+router.get('/menu/:menuId', (req, res) => 
+    recipeController.getRecipesByMenuId(req, res)
+);
+
 // POST create new recipe
 router.post('/', (req, res) => 
     recipeController.createRecipe(req, res)

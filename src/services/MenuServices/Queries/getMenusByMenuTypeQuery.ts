@@ -1,16 +1,17 @@
 import { ref, query, orderByChild, equalTo, get } from 'firebase/database';
 import { database } from '../../../config/database';
 import { MenuModel } from '../../../models/menu';
-import { RecipeModel } from '../../../models/recipe';
 import { MenuPromptType } from '../../../enums/MenuPromptType';
 
-interface MenuWithRecipesModel extends MenuModel {
-    recipes: RecipeModel[];
+interface SimpleMenuModel {
+    id: string;
+    title: string;
+    menuPromptType: MenuPromptType;
 }
 
 export interface MenuQueryResponse {
     success: boolean;
-    data?: MenuWithRecipesModel[] | [];
+    data?: SimpleMenuModel[] | [];
     errorMessage: string;
 }
 
@@ -19,7 +20,7 @@ export class GetMenusByMenuTypeQuery {
         try {
             console.log(`Menü sorgusu başladı: ${menuPromptType}, ${languageCode}`);
             
-            // 1. Menüleri getir
+            // Menüleri getir
             const menusRef = ref(database, 'menus');
             
             // menuPromptType'a göre sorgula
@@ -40,8 +41,7 @@ export class GetMenusByMenuTypeQuery {
                 };
             }
             
-            const menus: MenuModel[] = [];
-            const menusWithRecipes: MenuWithRecipesModel[] = [];
+            const menus: SimpleMenuModel[] = [];
             
             // Menüleri topla
             menuSnapshot.forEach((childSnapshot) => {
@@ -49,7 +49,12 @@ export class GetMenusByMenuTypeQuery {
                 
                 // Dil koduna göre filtrele
                 if (menu.languageCode === languageCode) {
-                    menus.push(menu);
+                    // Sadece istenen alanları al
+                    menus.push({
+                        id: menu.id,
+                        title: menu.title,
+                        menuPromptType: menu.menuPromptType
+                    });
                 }
             });
             
@@ -62,42 +67,9 @@ export class GetMenusByMenuTypeQuery {
                 };
             }
             
-            // 2. Her menü için reçeteleri getir
-            for (const menu of menus) {
-                const menuWithRecipes: MenuWithRecipesModel = {
-                    ...menu,
-                    recipes: []
-                };
-                
-                // Menüye bağlı reçeteleri getir
-                if (menu.recipeIds && menu.recipeIds.length > 0) {
-                    const recipesRef = ref(database, 'recipes');
-                    
-                    // Her reçete ID'si için veritabanından sorgula
-                    for (const recipeId of menu.recipeIds) {
-                        const recipeSnapshot = await get(
-                            query(recipesRef, orderByChild('id'), equalTo(recipeId))
-                        );
-                        
-                        if (recipeSnapshot.exists()) {
-                            recipeSnapshot.forEach((childSnapshot) => {
-                                const recipe = childSnapshot.val() as RecipeModel;
-                                
-                                // Dil kontrolü yap
-                                if (recipe.languageCode === languageCode) {
-                                    menuWithRecipes.recipes.push(recipe);
-                                }
-                            });
-                        }
-                    }
-                }
-                
-                menusWithRecipes.push(menuWithRecipes);
-            }
-            
             return {
                 success: true,
-                data: menusWithRecipes,
+                data: menus,
                 errorMessage: 'Menüler başarıyla getirildi'
             };
             
